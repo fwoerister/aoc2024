@@ -111,7 +111,7 @@ if __name__ == '__main__':
     print(f"time: {end_2 - end_1}")
 
     if args.submit == 1:
-        print(submit_answer(answer_1, 5, 1))
+        print(submit_answer(answer_1, 6, 1))
 
     if args.submit == 2:
-        print(submit_answer(answer_2, 5, 2))
+        print(submit_answer(answer_2, 6, 2))
