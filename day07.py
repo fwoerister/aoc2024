@@ -1,16 +1,18 @@
+from time import time
 from util.args import parse_args
 from util.submit import submit_answer
 
 
-def find_ops(result, values):
+def find_ops(result, values, operations):
     if len(values) == 1:
         return values[0] == result
 
-    values_plus = [values[0] + values[1]] + values[2:]
-    values_mult = [values[0] * values[1]] + values[2:]
-    values_cat = [int(str(values[0]) + str(values[1]))] + values[2:]
+    results = []
+    for op in operations:
+        new_values = [op(values[0], values[1])] + values[2:]
+        results.append(find_ops(result, new_values, operations))
 
-    return find_ops(result, values_plus) or find_ops(result, values_mult) or find_ops(result, values_cat)
+    return any(results)
 
 
 if __name__ == '__main__':
@@ -19,16 +21,31 @@ if __name__ == '__main__':
     answer_2 = 0
 
     with args.puzzle_input as file:
-        for line in file.readlines():
+        equations = file.readlines()
+
+        start = round(time() * 1000)
+        for line in equations:
             result, values = line.split(': ')
             result = int(result)
             values = [int(v) for v in values.split(' ')]
 
-            if find_ops(result, values):
+            if find_ops(result, values, [lambda x, y: x + y, lambda x, y: x * y]):
                 answer_1 += result
 
+        end_1 = round(time() * 1000)
+        for line in equations:
+            result, values = line.split(': ')
+            result = int(result)
+            values = [int(v) for v in values.split(' ')]
+
+            if find_ops(result, values, [lambda x, y: x + y, lambda x, y: x * y, lambda x, y: int(str(x) + str(y))]):
+                answer_2 += result
+        end_2 = round(time() * 1000)
+
     print(answer_1)
+    print(f'time: {end_1 - start}ms')
     print(answer_2)
+    print(f'time: {end_2 - end_1}ms')
 
     if args.submit == 1:
         print(submit_answer(answer_1, 5, 1))
