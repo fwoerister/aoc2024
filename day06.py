@@ -1,107 +1,95 @@
 from util.args import parse_args
 from util.submit import submit_answer
+from time import time
+
+DIRECTIONS = {
+    '^': (0, -1),
+    'v': (0, 1),
+    '<': (-1, 0),
+    '>': (1, 0),
+}
 
 NEXT_DIRECTION = {
     '^': '>',
     '>': 'v',
     'v': '<',
-    '<': '^'
+    '<': '^',
 }
 
 
 class GuardianMap:
     def __init__(self, rows):
-        rows = list(map(lambda line: line.strip(), filter(lambda row: row, rows)))
-        self.obstacles = []
-        self.pos = None
+        self.map = list(map(lambda e: list(e.strip()), filter(lambda e: e, rows)))
+        self.height = len(self.map)
+        self.width = len(self.map[0]) if self.height != 0 else 0
 
-        self.width = len(rows[0])
-        self.height = len(rows)
+        self.start_pos, self.start_dir = self._find_start_pos()
 
-        for row_idx in range(len(rows)):
-            for col_idx in range(len(rows[row_idx])):
-                if rows[row_idx][col_idx] == '#':
-                    self.obstacles.append((col_idx, row_idx))
-                if rows[row_idx][col_idx] in ['^', 'v', '>', '<']:
-                    self.pos = (col_idx, row_idx, rows[row_idx][col_idx])
+    def _find_start_pos(self):
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.map[y][x] in ['^', '>', 'v', '<']:
+                    return (x, y), self.map[y][x]
+
+    def on_map(self, pos):
+        return 0 <= pos[0] < self.width and 0 <= pos[1] < self.height
+
+    def move_next_obstacle(self, start, direction):
+        current = start
+        fields = []
+
+        while self.on_map(current) and self.map[current[1]][current[0]] != '#':
+            fields.append(current)
+            current = (current[0] + DIRECTIONS[direction][0], current[1] + DIRECTIONS[direction][1])
+
+        if not self.on_map(current):
+            current = None
+        elif len(fields) == 1:
+            current = None
+            fields = []
+        else:
+            current = fields[-1]
+            fields = fields[:-1]
+
+        return current, fields
+
+    def get_visited_fields(self, exclude_start=False):
+        current_pos = self.start_pos
+        current_dir = self.start_dir
+
+        visited_fields = set()
+
+        while current_pos:
+            current_pos, traversed_fields = self.move_next_obstacle(current_pos, current_dir)
+            visited_fields.update(traversed_fields)
+            current_dir = NEXT_DIRECTION[current_dir]
+
+        if exclude_start:
+            visited_fields.remove(self.start_pos)
+
+        return visited_fields
 
     def is_loop(self):
-        visited = [(self.pos[0], self.pos[1], self.pos[2])]
-        current = (self.pos[0], self.pos[1], self.pos[2])
-        next_obstacle = (-1, -1)
+        current_pos = self.start_pos
+        current_dir = self.start_dir
 
-        while next_obstacle:
-            if current[2] == '^':
-                next_obstacle = list(
-                    filter(lambda obst: obst[0] == current[0] and obst[1] < current[1], self.obstacles))
-                if next_obstacle:
-                    next_obstacle = max(next_obstacle, key=lambda pos: pos[1])
-                    next_move = [(current[0], y, '^') for y in range(next_obstacle[1] + 1, current[1])]
+        visited_pos = set()
 
-                    if next_move and next_move[-1] in visited:
-                        return True
+        while current_pos and current_pos not in visited_pos:
+            visited_pos.add(current_pos)
+            current_pos, fields = self.move_next_obstacle(current_pos, current_dir)
+            current_dir = NEXT_DIRECTION[current_dir]
 
-                    visited.extend(next_move)
-
-                    current = (next_obstacle[0], next_obstacle[1] + 1, NEXT_DIRECTION[current[2]])
-
-            elif current[2] == '>':
-                next_obstacle = list(filter(lambda obst: obst[0] > current[0] and obst[1] == current[1],
-                                            self.obstacles))
-
-                if next_obstacle:
-                    next_obstacle = min(next_obstacle, key=lambda pos: pos[0])
-                    next_move = [(x, current[1], '>') for x in range(current[0] + 1, next_obstacle[0])]
-                    if next_move and next_move[-1] in visited:
-                        return True
-                    visited.extend(next_move)
-
-                    current = (next_obstacle[0] - 1, next_obstacle[1], NEXT_DIRECTION[current[2]])
-
-            elif current[2] == 'v':
-                next_obstacle = list(filter(lambda obst: obst[0] == current[0] and obst[1] > current[1],
-                                            self.obstacles))
-
-                if next_obstacle:
-                    next_obstacle = min(next_obstacle, key=lambda pos: pos[1])
-                    next_move = [(current[0], y, 'v') for y in range(current[1] + 1, next_obstacle[1])]
-                    if next_move and next_move[-1] in visited:
-                        return True
-                    visited.extend(next_move)
-
-                    current = (next_obstacle[0], next_obstacle[1] - 1, NEXT_DIRECTION[current[2]])
-            elif current[2] == '<':
-                next_obstacle = list(filter(lambda obst: obst[0] < current[0] and obst[1] == current[1],
-                                            self.obstacles))
-
-                if next_obstacle:
-                    next_obstacle = max(next_obstacle, key=lambda pos: pos[0])
-                    next_move = [(x, current[1], '<') for x in range(next_obstacle[0] + 1, current[0])]
-                    if next_move and next_move[-1] in visited:
-                        return True
-                    visited.extend(next_move)
-
-                    current = (next_obstacle[0] + 1, next_obstacle[1], NEXT_DIRECTION[current[2]])
-
-        return False
+        return current_pos is not None
 
     def find_possible_loops(self):
-        count = 0
-        possible_obst = []
-        for row_idx in range(self.height):
-            for col_idx in range(self.width):
-                new_obst = (col_idx, row_idx)
-                if new_obst not in self.obstacles:
-                    possible_obst.append(new_obst)
-
-        for obst in possible_obst:
-            self.obstacles.append(obst)
+        loops = 0
+        for new_obst in self.get_visited_fields(exclude_start=True):
+            self.map[new_obst[1]][new_obst[0]] = '#'
             if self.is_loop():
-                count += 1
-                print(obst)
-            self.obstacles.remove(obst)
-
-        return count
+                loops += 1
+            self.map[new_obst[1]][new_obst[0]] = '.'
+        return loops
 
 
 if __name__ == '__main__':
@@ -111,15 +99,19 @@ if __name__ == '__main__':
 
     with args.puzzle_input as file:
         guardian_map = GuardianMap(file.readlines())
-
-    print(guardian_map.is_loop())
-    answer_2 = guardian_map.find_possible_loops()
+        start = round(time() * 1000)
+        answer_1 = len(guardian_map.get_visited_fields())
+        end_1 = round(time() * 1000)
+        answer_2 = guardian_map.find_possible_loops()
+        end_2 = round(time() * 1000)
 
     print(answer_1)
+    print(f"time: {end_1 - start}")
     print(answer_2)
+    print(f"time: {end_2 - end_1}")
 
     if args.submit == 1:
-        print(submit_answer(answer_1, 6, 1))
+        print(submit_answer(answer_1, 5, 1))
 
     if args.submit == 2:
-        print(submit_answer(answer_2, 6, 2))
+        print(submit_answer(answer_2, 5, 2))
