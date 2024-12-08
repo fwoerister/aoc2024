@@ -1,10 +1,13 @@
 from util.args import parse_args
+from util.submit import submit_answer
 
 if __name__ == '__main__':
     left_list = []
     right_list = []
 
     args = parse_args()
+    answer_1 = 0
+    answer_2 = 0
 
     with args.puzzle_input as file:
         for line in file.readlines():
@@ -15,13 +18,16 @@ if __name__ == '__main__':
     left_list.sort()
     right_list.sort()
 
-    distances = list(map(lambda id_tuple: abs(id_tuple[0] - id_tuple[1]), zip(left_list, right_list)))
-
-    print(f"total distance: {sum(distances)}")
-
-    sim_score = 0
+    answer_1 = len(list(map(lambda id_tuple: abs(id_tuple[0] - id_tuple[1]), zip(left_list, right_list))))
 
     for val in left_list:
-        sim_score += val * right_list.count(val)
+        answer_2 += val * right_list.count(val)
 
-    print(f"similarity score: {sim_score}")
+    print(answer_1)
+    print(answer_2)
+
+    if args.submit == 1:
+        print(submit_answer(answer_1, 1, 1))
+
+    if args.submit == 2:
+        print(submit_answer(answer_2, 1, 2))

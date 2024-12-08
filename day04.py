@@ -70,31 +70,31 @@ if __name__ == '__main__':
     with args.puzzle_input as file:
         puzzle = Puzzle(file.readlines())
 
-        count_part1 = 0
-        count_part2 = 0
+        answer_1 = 0
+        answer_2 = 0
 
         for col in range(puzzle.cols):
             for row in range(puzzle.rows):
                 if puzzle.get_horizontal_word(col, row, 4) in ['XMAS', 'SAMX']:
-                    count_part1 += 1
+                    answer_1 += 1
                 if puzzle.get_vertical_word(col, row, 4) in ['XMAS', 'SAMX']:
-                    count_part1 += 1
+                    answer_1 += 1
                 if puzzle.get_diagonal_word(col, row, 4) in ['XMAS', 'SAMX']:
-                    count_part1 += 1
+                    answer_1 += 1
                 if puzzle.get_anti_diagonal_word(col, row, 4) in ['XMAS', 'SAMX']:
-                    count_part1 += 1
+                    answer_1 += 1
 
                 anti_diagonal_word = puzzle.get_anti_diagonal_word(col, row, 3)
                 diagonal_word = puzzle.get_diagonal_word(col + 2, row, 3)
 
                 if anti_diagonal_word in ['MAS', 'SAM'] and diagonal_word in ['MAS', 'SAM']:
-                    count_part2 += 1
+                    answer_2 += 1
 
         if args.submit == 1:
-            print(count_part1)
-            print(submit_answer(count_part1, 4, 1))
+            print(answer_1)
+            print(submit_answer(answer_1, 4, 1))
 
         if args.submit == 2:
-            print(count_part2)
-            print(submit_answer(count_part2, 4, 2))
+            print(answer_2)
+            print(submit_answer(answer_2, 4, 2))
 
