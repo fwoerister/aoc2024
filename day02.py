@@ -46,7 +46,9 @@ def check_report_rec(report, corrections_needed):
 if __name__ == '__main__':
     reports = []
 
-    with parse_args() as file:
+    args = parse_args()
+
+    with args.puzzle_input as file:
         for line in file.readlines():
             reports.append([int(val) for val in line.split(' ')])
 
