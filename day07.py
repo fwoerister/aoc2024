@@ -7,10 +7,15 @@ def find_ops(result, values, operations):
     if len(values) == 1:
         return values[0] == result
 
+    if sum(values) > result:
+        return False
+    if int(''.join([str(val) for val in values])) < result:
+        return False
+
     results = []
     for op in operations:
-        new_values = [op(values[0], values[1])] + values[2:]
-        results.append(find_ops(result, new_values, operations))
+        reduced_values = [op(values[0], values[1])] + values[2:]
+        results.append(find_ops(result, reduced_values, operations))
 
     return any(results)
 
