@@ -1,23 +1,35 @@
+from functools import reduce
 from time import time
 from util.args import parse_args
 from util.submit import submit_answer
 
 
-def find_ops(result, values, operations):
+def default_lower_bound_func(values):
+    if all(map(lambda x: x > 1, values)):
+        return sum(values) > result
+    else:
+        return int(reduce(lambda x, y: x * y, values))
+
+
+def default_upper_bound_func(values):
+    return int(''.join([str(val) for val in values])) < result
+
+
+def find_ops(result, values, operations: list,
+             lower_bound_func=default_lower_bound_func,
+             upper_bound_func=default_lower_bound_func):
     if len(values) == 1:
         return values[0] == result
 
-    if sum(values) > result:
-        return False
-    if int(''.join([str(val) for val in values])) < result:
+    if lower_bound_func(values) > result or upper_bound_func(values) > result:
         return False
 
-    results = []
     for op in operations:
         reduced_values = [op(values[0], values[1])] + values[2:]
-        results.append(find_ops(result, reduced_values, operations))
+        if find_ops(result, reduced_values, operations):
+            return True
 
-    return any(results)
+    return False
 
 
 if __name__ == '__main__':
