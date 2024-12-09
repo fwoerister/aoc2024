@@ -3,10 +3,11 @@ import re
 from util.args import parse_args
 
 if __name__ == '__main__':
+    args = parse_args()
     add_mul_to_result = True
     result = 0
 
-    with parse_args() as file:
+    with args.puzzle_input as file:
         memory = ''.join(file.readlines())
 
         for group in re.findall(r"mul\((\d+,\d+)\)|(do\(\))|(don't\(\))", memory):

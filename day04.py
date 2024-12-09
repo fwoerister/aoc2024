@@ -90,11 +90,12 @@ if __name__ == '__main__':
                 if anti_diagonal_word in ['MAS', 'SAM'] and diagonal_word in ['MAS', 'SAM']:
                     answer_2 += 1
 
+        print(f"level 1: {answer_1}")
+        print(f"level 2: {answer_2}")
+
         if args.submit == 1:
-            print(answer_1)
             print(submit_answer(answer_1, 4, 1))
 
         if args.submit == 2:
-            print(answer_2)
             print(submit_answer(answer_2, 4, 2))
 
