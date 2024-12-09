@@ -1,5 +1,4 @@
 from time import time
-from typing import List
 
 from util.args import parse_args
 from util.submit import submit_answer
@@ -43,6 +42,26 @@ def calculate_checksum(diskmap: str):
         idx += 1
 
     return checksum
+
+
+def calculate_checksum2(diskmap: str):
+    if len(diskmap) % 2 == 0:
+        diskmap = diskmap[:-1]
+    diskmap = [int(b) for b in list(diskmap)]
+    disk = []
+
+    idx = 0
+    while idx < len(diskmap):
+        if idx % 2 == 0:
+            disk.append([[idx // 2] * diskmap[idx]])
+        else:
+            disk.append([])
+
+    for data_block in range(len(diskmap) - 1, 0, -2):
+        for free_block in range(1, len(diskmap), 2):
+            if len(disk[data_block]) <= len(disk[free_block]):
+                disk[free_block].extend(disk[data_block])
+                disk[data_block] = []
 
 
 if __name__ == '__main__':
