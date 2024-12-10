@@ -1,4 +1,7 @@
+from time import time
+
 from util.args import parse_args
+from util.submit import submit_answer
 
 
 def do_failsafe_report_check(report):
@@ -34,6 +37,19 @@ if __name__ == '__main__':
         for line in file.readlines():
             reports.append([int(val) for val in line.split(' ')])
 
-    reports_normal = [do_failsafe_report_check(r) for r in reports]
+    start = round(time() * 1000)
+    answer_1 = sum([check_report(r) for r in reports])
+    end_1 = round(time() * 1000)
+    answer_2 = sum([do_failsafe_report_check(r) for r in reports])
+    end_2 = round(time() * 1000)
 
-    print(sum(reports_normal))
+    print(answer_1)
+    print(f'time: {end_1 - start}ms')
+    print(answer_2)
+    print(f'time: {end_2 - end_1}ms')
+
+    if args.submit == 1:
+        print(submit_answer(answer_1, 2, 1))
+
+    if args.submit == 2:
+        print(submit_answer(answer_2, 2, 2))

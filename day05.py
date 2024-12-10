@@ -1,3 +1,5 @@
+from time import time
+
 from util.args import parse_args
 from util.submit import submit_answer
 
@@ -74,15 +76,24 @@ if __name__ == '__main__':
         successors_of_rules = parse_successor_rules(file)
         manual_pages = parse_update_pages(file)
 
+    start = round(time() * 1000)
     for manual_update in manual_pages:
         if check_if_valid(manual_update, successors_of_rules):
             answer_1 += int(manual_update[len(manual_update) // 2])
-        else:
+
+    end_1 = round(time() * 1000)
+
+    for manual_update in manual_pages:
+        if not check_if_valid(manual_update, successors_of_rules):
             new_update = fix_update(manual_update, successors_of_rules)
             answer_2 += int(new_update[len(new_update) // 2])
 
+    end_2 = round(time() * 1000)
+
     print(answer_1)
+    print(f'time: {end_1 - start}ms')
     print(answer_2)
+    print(f'time: {end_2 - end_1}ms')
 
     if args.submit == 1:
         print(submit_answer(answer_1, 5, 1))

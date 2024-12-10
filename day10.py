@@ -31,7 +31,7 @@ class HikingMap:
     def is_valid_step(self, x, y, next_x, next_y):
         return self.is_on_map(next_x, next_y) and self.is_incremental(x, y, next_x, next_y)
 
-    def get_neighbours(self, x, y):
+    def get_next_single_step_climbs(self, x, y):
         neighbours = [
             (x + 1, y),
             (x - 1, y),
@@ -44,7 +44,7 @@ class HikingMap:
         for height in range(1, 10):
             new_trails = []
             for trail in open_trails:
-                next_steps = self.get_neighbours(*(trail[-1]))
+                next_steps = self.get_next_single_step_climbs(*(trail[-1]))
                 for step in next_steps:
                     new_trails.append(trail + [step])
             open_trails = new_trails
@@ -75,7 +75,6 @@ if __name__ == '__main__':
     with args.puzzle_input as file:
         hiking_map = HikingMap(file.readlines())
         start = round(time() * 1000)
-
         answer_1 = hiking_map.get_total_score_level1()
 
         end_1 = round(time() * 1000)

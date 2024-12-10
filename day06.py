@@ -106,9 +106,9 @@ if __name__ == '__main__':
         end_2 = round(time() * 1000)
 
     print(answer_1)
-    print(f"time: {end_1 - start}")
+    print(f"time: {end_1 - start}ms")
     print(answer_2)
-    print(f"time: {end_2 - end_1}")
+    print(f"time: {end_2 - end_1}ms")
 
     if args.submit == 1:
         print(submit_answer(answer_1, 6, 1))
