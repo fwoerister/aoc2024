@@ -1,4 +1,5 @@
 from util.args import parse_args
+from util.datastructures import Grid
 from util.submit import submit_answer
 from time import time
 
@@ -17,32 +18,29 @@ NEXT_DIRECTION = {
 }
 
 
-class GuardianMap:
+class GuardianGrid(Grid):
     def __init__(self, rows):
-        self.map = list(map(lambda e: list(e.strip()), filter(lambda e: e, rows)))
-        self.height = len(self.map)
-        self.width = len(self.map[0]) if self.height != 0 else 0
+        super().__init__(rows)
 
-        self.start_pos, self.start_dir = self._find_start_pos()
+        self.start_pos = None
+        self.start_dir = None
 
-    def _find_start_pos(self):
-        for x in range(self.width):
-            for y in range(self.height):
-                if self.map[y][x] in ['^', '>', 'v', '<']:
-                    return (x, y), self.map[y][x]
+        def find_and_store_start_pos(x, y):
+            if self.rows[y][x] in ['^', '>', 'v', '<']:
+                self.start_pos = (x, y)
+                self.start_dir = self.rows[y][x]
 
-    def on_map(self, pos):
-        return 0 <= pos[0] < self.width and 0 <= pos[1] < self.height
+        self.foreach(find_and_store_start_pos)
 
     def move_next_obstacle(self, start, direction):
         current = start
         fields = []
 
-        while self.on_map(current) and self.map[current[1]][current[0]] != '#':
+        while self.is_on_grid(*current) and self.rows[current[1]][current[0]] != '#':
             fields.append(current)
             current = (current[0] + DIRECTIONS[direction][0], current[1] + DIRECTIONS[direction][1])
 
-        if not self.on_map(current):
+        if not self.is_on_grid(*current):
             current = None
         elif len(fields) == 1:
             current = None
@@ -85,10 +83,10 @@ class GuardianMap:
     def find_possible_loops(self):
         loops = 0
         for new_obst in self.get_visited_fields(exclude_start=True):
-            self.map[new_obst[1]][new_obst[0]] = '#'
+            self.rows[new_obst[1]][new_obst[0]] = '#'
             if self.is_loop():
                 loops += 1
-            self.map[new_obst[1]][new_obst[0]] = '.'
+            self.rows[new_obst[1]][new_obst[0]] = '.'
         return loops
 
 
@@ -98,7 +96,7 @@ if __name__ == '__main__':
     answer_2 = 0
 
     with args.puzzle_input as file:
-        guardian_map = GuardianMap(file.readlines())
+        guardian_map = GuardianGrid(file.readlines())
         start = round(time() * 1000)
         answer_1 = len(guardian_map.get_visited_fields())
         end_1 = round(time() * 1000)

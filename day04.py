@@ -1,28 +1,22 @@
 from time import time
 
 from util.args import parse_args
+from util.datastructures import Grid
 from util.submit import submit_answer
 
 
-class Puzzle:
-    def __init__(self, puzzle_input):
-        self.puzzle = list(map(lambda puzzle_row: puzzle_row.strip(),
-                               filter(lambda puzzle_row: puzzle_row,
-                                      puzzle_input)))
-        self.rows = len(self.puzzle)
-        self.cols = len(self.puzzle[0])
-
-    def is_on_puzzle(self, x, y):
-        return 0 <= x < self.cols and 0 <= y < self.rows
+class Puzzle(Grid):
+    def __init__(self, rows):
+        super().__init__(rows)
 
     def get_horizontal_word(self, x, y, word_len):
         start = (x, y)
         end = (x + (word_len - 1), y)
 
-        if not (self.is_on_puzzle(*start) and self.is_on_puzzle(*end)):
+        if not (self.is_on_grid(*start) and self.is_on_grid(*end)):
             return ""
 
-        line = self.puzzle[y]
+        line = self.rows[y]
         word = line[x:x + word_len]
         return word
 
@@ -30,12 +24,12 @@ class Puzzle:
         start = (x, y)
         end = (x, y + (word_len - 1))
 
-        if not (self.is_on_puzzle(*start) and self.is_on_puzzle(*end)):
+        if not (self.is_on_grid(*start) and self.is_on_grid(*end)):
             return ""
 
         word = ""
         for i in range(0, word_len):
-            word += self.puzzle[y + i][x]
+            word += self.rows[y + i][x]
 
         return word
 
@@ -43,12 +37,12 @@ class Puzzle:
         start = (x, y)
         end = (x - (word_len - 1), y + (word_len - 1))
 
-        if not (self.is_on_puzzle(*start) and self.is_on_puzzle(*end)):
+        if not (self.is_on_grid(*start) and self.is_on_grid(*end)):
             return ""
 
         word = ""
         for i in range(0, word_len):
-            word += self.puzzle[y + i][x - i]
+            word += self.rows[y + i][x - i]
 
         return word
 
@@ -56,19 +50,19 @@ class Puzzle:
         start = (x, y)
         end = (x + (word_len - 1), y + (word_len - 1))
 
-        if not (self.is_on_puzzle(*start) and self.is_on_puzzle(*end)):
+        if not (self.is_on_grid(*start) and self.is_on_grid(*end)):
             return ""
 
         word = ""
         for i in range(0, word_len):
-            word += self.puzzle[y + i][x + i]
+            word += self.rows[y + i][x + i]
 
         return word
 
     def count_xmas_instances(self):
         count = 0
-        for col in range(puzzle.cols):
-            for row in range(puzzle.rows):
+        for col in range(puzzle.width):
+            for row in range(puzzle.height):
                 if puzzle.get_horizontal_word(col, row, 4) in ['XMAS', 'SAMX']:
                     count += 1
                 if puzzle.get_vertical_word(col, row, 4) in ['XMAS', 'SAMX']:
@@ -81,8 +75,8 @@ class Puzzle:
 
     def count_mas_crosses(self):
         count = 0
-        for col in range(puzzle.cols):
-            for row in range(puzzle.rows):
+        for col in range(puzzle.width):
+            for row in range(puzzle.height):
                 anti_diagonal_word = puzzle.get_anti_diagonal_word(col, row, 3)
                 diagonal_word = puzzle.get_diagonal_word(col + 2, row, 3)
 

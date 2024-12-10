@@ -2,35 +2,24 @@ from itertools import product
 from time import time
 
 from util.args import parse_args
+from util.datastructures import Grid
 from util.submit import submit_answer
 
 
-class AntennaMap:
+class AntennaGrid(Grid):
     def __init__(self, rows):
-        self.rows = list(map(lambda line: line.strip(), filter(lambda x: x, rows)))
-        self.height = len(self.rows)
-        self.width = 0 if self.height == 0 else len(self.rows[0])
+        super().__init__(rows)
 
         self.antennas = {}
 
-        self.parse_antennas()
+        def add_antenna_to_dict(x, y):
+            if (antenna_id := self.get_val_at(x, y)) != '.':
+                if antenna_id not in self.antennas:
+                    self.antennas[antenna_id] = [(x, y)]
+                else:
+                    self.antennas[antenna_id].append((x, y))
 
-    def is_on_map(self, x, y):
-        return 0 <= x < self.width and 0 <= y < self.height
-
-    def get_val(self, x, y):
-        if self.is_on_map(x, y):
-            return self.rows[y][x]
-        return None
-
-    def parse_antennas(self):
-        for x in range(self.width):
-            for y in range(self.height):
-                if (antenna_id := self.get_val(x, y)) != '.':
-                    if antenna_id not in self.antennas:
-                        self.antennas[antenna_id] = [(x, y)]
-                    else:
-                        self.antennas[antenna_id].append((x, y))
+        self.foreach(add_antenna_to_dict)
 
     def get_antinodes(self, antenna_id, include_resonate_harmonic=False):
         anti_nodes = set()
@@ -41,11 +30,11 @@ class AntennaMap:
 
                 if include_resonate_harmonic:
                     anti_node = antenna_2
-                    while self.is_on_map(*anti_node):
+                    while self.is_on_grid(*anti_node):
                         anti_nodes.add(anti_node)
                         anti_node = (anti_node[0] + diff[0], anti_node[1] + diff[1])
                 else:
-                    if self.is_on_map(*anti_node):
+                    if self.is_on_grid(*anti_node):
                         anti_nodes.add(anti_node)
 
         return anti_nodes
@@ -64,7 +53,7 @@ if __name__ == '__main__':
 
     with args.puzzle_input as file:
 
-        antenna_map = AntennaMap(file.readlines())
+        antenna_map = AntennaGrid(file.readlines())
 
         start = round(time() * 1000)
         answer_1 = len(antenna_map.get_all_anti_nodes(False))

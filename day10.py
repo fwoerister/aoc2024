@@ -1,35 +1,29 @@
 from time import time
 
 from util.args import parse_args
+from util.datastructures import Grid
 from util.submit import submit_answer
 
 
-class HikingMap:
+class HikingGrid(Grid):
     def __init__(self, rows):
-        self.rows = list(map(lambda line: line.strip(), filter(lambda x: x, rows)))
-        self.height = len(self.rows)
-        self.width = 0 if self.height == 0 else len(self.rows[0])
-        self.heads = self.get_heads()
+        super().__init__(rows)
 
-    def get_heads(self):
-        heads = []
-        for x in range(self.width):
-            for y in range(self.height):
-                if self.get_height(x, y) == 0:
-                    heads.append((x, y))
-        return heads
+        self.convert_to_int_vals()
 
-    def get_height(self, x, y):
-        return int(self.rows[y][x])
+        self.heads = []
 
-    def is_on_map(self, x, y):
-        return 0 <= x < self.width and 0 <= y < self.height
+        def add_head_if_val_is_zero(x, y):
+            if self.get_val_at(x, y) == 0:
+                self.heads.append((x, y))
+
+        self.foreach(add_head_if_val_is_zero)
 
     def is_incremental(self, x, y, next_x, next_y):
-        return self.get_height(x, y) + 1 == self.get_height(next_x, next_y)
+        return self.get_val_at(x, y) + 1 == self.get_val_at(next_x, next_y)
 
     def is_valid_step(self, x, y, next_x, next_y):
-        return self.is_on_map(next_x, next_y) and self.is_incremental(x, y, next_x, next_y)
+        return self.is_on_grid(next_x, next_y) and self.is_incremental(x, y, next_x, next_y)
 
     def get_next_single_step_climbs(self, x, y):
         neighbours = [
@@ -73,7 +67,7 @@ if __name__ == '__main__':
     args = parse_args()
 
     with args.puzzle_input as file:
-        hiking_map = HikingMap(file.readlines())
+        hiking_map = HikingGrid(file.readlines())
         start = round(time() * 1000)
         answer_1 = hiking_map.get_total_score_level1()
 
