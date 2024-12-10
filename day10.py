@@ -56,7 +56,7 @@ class HikingMap:
     def get_trail_score_level2(self, start_pos):
         return len(self.find_possible_trails([[start_pos]]))
 
-    def get_total_score(self):
+    def get_total_score_level1(self):
         score = 0
         for pos in self.heads:
             score += self.get_trail_score_level1(pos)
@@ -76,7 +76,7 @@ if __name__ == '__main__':
         hiking_map = HikingMap(file.readlines())
         start = round(time() * 1000)
 
-        answer_1 = hiking_map.get_total_score()
+        answer_1 = hiking_map.get_total_score_level1()
 
         end_1 = round(time() * 1000)
 
