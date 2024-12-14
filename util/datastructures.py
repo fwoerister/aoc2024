@@ -5,7 +5,9 @@ class Grid:
         self.width = 0 if self.height == 0 else len(self.rows[0])
 
     def get_val_at(self, x: int, y: int) -> str:
-        return self.rows[y][x]
+        if self.is_on_grid(x,y):
+            return self.rows[y][x]
+        return None
 
     def is_on_grid(self, x: int, y: int) -> bool:
         return 0 <= x < self.width and 0 <= y < self.height
@@ -14,6 +16,42 @@ class Grid:
         for x in range(self.width):
             for y in range(self.height):
                 func(x, y)
+
+    def get_neighbours(self, x, y):
+        neighbours = [
+            (x + 1, y),
+            (x - 1, y),
+            (x, y + 1),
+            (x, y - 1),
+        ]
+
+        return list(filter(lambda n: self.is_on_grid(*n), neighbours))
+
+    def get_horizontal_neighbours(self, x, y):
+        neighbours = [
+            (x + 1, y),
+            (x - 1, y),
+        ]
+
+        return list(filter(lambda n: self.is_on_grid(*n), neighbours))
+
+    def get_vertical_neighbours(self, x, y):
+        neighbours = [
+            (x, y + 1),
+            (x, y - 1),
+        ]
+
+        return list(filter(lambda n: self.is_on_grid(*n), neighbours))
+
+    def get_diagnoal_neighbours(self, x, y):
+        neighbours = [
+            (x + 1, y + 1),
+            (x - 1, y + 1),
+            (x + 1, y - 1),
+            (x - 1, y - 1),
+        ]
+
+        return list(filter(lambda n: self.is_on_grid(*n), neighbours))
 
     def convert_to_int_vals(self):
         def convert_field_to_int(x: int, y: int) -> None:
