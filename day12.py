@@ -60,18 +60,18 @@ class Garden(Grid):
                     self.get_val_at(*field) != self.get_val_at(field[0] + 1, field[1] - 1)):
                 sides += 1
 
-            if (self.get_val_at(*field) == self.get_val_at(field[0]+1, field[1]) and
-                    self.get_val_at(*field) == self.get_val_at(field[0], field[1]+1) and
+            if (self.get_val_at(*field) == self.get_val_at(field[0] + 1, field[1]) and
+                    self.get_val_at(*field) == self.get_val_at(field[0], field[1] + 1) and
                     self.get_val_at(*field) != self.get_val_at(field[0] + 1, field[1] + 1)):
                 sides += 1
 
-            if (self.get_val_at(*field) == self.get_val_at(field[0], field[1]+1) and
-                    self.get_val_at(*field) == self.get_val_at(field[0]-1, field[1]) and
+            if (self.get_val_at(*field) == self.get_val_at(field[0], field[1] + 1) and
+                    self.get_val_at(*field) == self.get_val_at(field[0] - 1, field[1]) and
                     self.get_val_at(*field) != self.get_val_at(field[0] - 1, field[1] + 1)):
                 sides += 1
 
-            if (self.get_val_at(*field) == self.get_val_at(field[0]-1, field[1]) and
-                    self.get_val_at(*field) == self.get_val_at(field[0], field[1]-1) and
+            if (self.get_val_at(*field) == self.get_val_at(field[0] - 1, field[1]) and
+                    self.get_val_at(*field) == self.get_val_at(field[0], field[1] - 1) and
                     self.get_val_at(*field) != self.get_val_at(field[0] - 1, field[1] - 1)):
                 sides += 1
 
@@ -98,8 +98,6 @@ class Garden(Grid):
             while self.garden_dict[label]:
                 region = self.extract_region(label)
                 self.garden_dict[label] = self.garden_dict[label].difference(region)
-                print(label)
-                print(self.get_sides(region))
                 cost += len(region) * self.get_sides(region)
         return cost
 

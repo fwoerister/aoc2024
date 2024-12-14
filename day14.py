@@ -1,5 +1,5 @@
 import re
-from time import time, sleep
+from time import time
 
 from util.args import parse_args
 from util.submit import submit_answer
@@ -33,20 +33,10 @@ def get_quadrants(robots):
     h_mid = (WIDTH // 2)
     v_mid = (HEIGHT // 2)
 
-    q1 = []
-    q2 = []
-    q3 = []
-    q4 = []
-
-    for robot in robots:
-        if robot['px'] < h_mid and robot['py'] < v_mid:
-            q1.append(robot)
-        elif robot['px'] > h_mid and robot['py'] < v_mid:
-            q2.append(robot)
-        elif robot['px'] < h_mid and robot['py'] > v_mid:
-            q3.append(robot)
-        elif robot['px'] > h_mid and robot['py'] > v_mid:
-            q4.append(robot)
+    q1 = list(filter(lambda x: x['px'] < h_mid and x['py'] < v_mid, robots))
+    q2 = list(filter(lambda x: x['px'] > h_mid and x['py'] < v_mid, robots))
+    q3 = list(filter(lambda x: x['px'] < h_mid and x['py'] > v_mid, robots))
+    q4 = list(filter(lambda x: x['px'] > h_mid and x['py'] > v_mid, robots))
 
     return q1, q2, q3, q4
 
@@ -113,6 +103,9 @@ if __name__ == '__main__':
     end_1 = round(time() * 1000)
 
     answer_2 = 0
+
+    for r in robots_l2:
+        move_robot(r, 6400)
 
     while not could_be_x_mas_tree(robots_l2):
         answer_2 += 1
