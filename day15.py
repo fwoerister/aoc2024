@@ -13,8 +13,8 @@ DIR = {
 
 
 class Warehouse(Grid):
-    def __init__(self, size):
-        super().__init__(size)
+    def __init__(self, rows):
+        super().__init__(rows)
         self.current = (0, 0)
 
         def set_start_pos(x, y):
