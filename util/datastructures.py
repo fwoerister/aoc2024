@@ -5,9 +5,13 @@ class Grid:
         self.width = 0 if self.height == 0 else len(self.rows[0])
 
     def get_val_at(self, x: int, y: int) -> str:
-        if self.is_on_grid(x,y):
+        if self.is_on_grid(x, y):
             return self.rows[y][x]
         return None
+
+    def set_val_at(self, x: int, y: int, val: object) -> None:
+        if self.is_on_grid(x, y):
+            self.rows[y][x] = val
 
     def is_on_grid(self, x: int, y: int) -> bool:
         return 0 <= x < self.width and 0 <= y < self.height
@@ -58,3 +62,8 @@ class Grid:
             self.rows[y][x] = int(self.get_val_at(x, y))
 
         self.foreach(convert_field_to_int)
+
+    def print_grid(self):
+        for y in range(self.height):
+            print(''.join(self.rows[y]))
+        print()
