@@ -12,22 +12,6 @@ DIR = {
 }
 
 
-class WarehouseL2(Grid):
-    def __init__(self, grid):
-        super().__init__(grid)
-
-        self.boxes = []
-        self.walls = []
-
-        def parse_field(x, y):
-            if self.get_val_at(x, y) == '[':
-                self.boxes.append((x, y))
-            if self.get_val_at(x, y) == '@':
-                self.current = (x, y)
-            if self.get_val_at(x, y) == '#':
-                self.walls.append((x, y))
-
-
 class Warehouse(Grid):
     def __init__(self, size):
         super().__init__(size)
