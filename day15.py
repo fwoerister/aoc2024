@@ -149,26 +149,23 @@ if __name__ == '__main__':
         while line := file.readline():
             directions += line.strip()
 
-    warehouse = Warehouse(grid)
-
-    answer_2 = 0
+    warehouse_l1 = Warehouse(grid)
+    grid = list(map(lambda l: l.replace('.', '..').replace('#', '##').replace('O', '[]').replace('@', '@.'), grid))
+    warehouse_l2 = Warehouse(grid)
 
     start = round(time() * 1000)
 
     for direction in directions:
-        warehouse.move_l1(DIR[direction])
+        warehouse_l1.move_l1(DIR[direction])
 
-    answer_1 = warehouse.calculate_gps_coordinates()
+    answer_1 = warehouse_l1.calculate_gps_coordinates()
 
     end_1 = round(time() * 1000)
 
-    grid = list(map(lambda l: l.replace('.', '..').replace('#', '##').replace('O', '[]').replace('@', '@.'), grid))
-    warehouse = Warehouse(grid)
-
     for direction in directions:
-        warehouse.move_l2(DIR[direction])
+        warehouse_l2.move_l2(DIR[direction])
 
-    answer_2 = warehouse.calculate_gps_coordinates()
+    answer_2 = warehouse_l2.calculate_gps_coordinates()
 
     end_2 = round(time() * 1000)
 
