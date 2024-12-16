@@ -13,26 +13,51 @@ DIR = {
     'v': (0, 1),
 }
 
+OPPOSITE_DIR = {
+    '>': (-1, 0),
+    '<': (1, 0),
+    'v': (0, -1),
+    '^': (0, 1),
+}
+
 
 class Maze(Grid):
     def __init__(self, rows):
         super().__init__(rows)
-        self.start = (0, 0, '<')
+        self.start = (0, 0, '>')
         self.end = (0, 0)
+        self.came_from = {
+
+        }
 
         def parse_tile(x, y):
             if self.get_val_at(x, y) == 'S':
-                self.start = (x, y, '<')
+                self.start = (x, y, '>')
             if self.get_val_at(x, y) == 'E':
                 self.end = (x, y)
 
         self.foreach(parse_tile)
 
+    @staticmethod
+    def get_score(pos, direction):
+        if DIR[pos] == direction:
+            return 1
+        elif OPPOSITE_DIR[pos] == direction:
+            return 2001
+        else:
+            return 1001
+
+    def reconstruct_path(self, current):
+        total_path = []
+        while (current[0], current[1]) in self.came_from:
+            current_with_dir = self.came_from[(current[0], current[1])]
+            total_path = [current_with_dir] + total_path
+            current = (current_with_dir[0], current_with_dir[1])
+        return total_path
+
     def find_shortest_path_score(self):
         open_paths = []
         heapq.heappush(open_paths, (0, self.start))
-
-        came_from = {}
 
         scores = {
             (self.start[0], self.start[1]): 0
@@ -40,25 +65,25 @@ class Maze(Grid):
 
         while open_paths:
             current_score, pos = heapq.heappop(open_paths)
+            scores[(pos[0], pos[1])] = current_score
 
             if pos[0] == self.end[0] and pos[1] == self.end[1]:
-                return current_score
+                return current_score, self.reconstruct_path((pos[0], pos[1]))
 
             neighbours = [
-                (1 if pos[2] == '<' else 1000, (pos[0] - 1, pos[1], '<')),
-                (1 if pos[2] == '>' else 1000, (pos[0] + 1, pos[1], '>')),
-                (1 if pos[2] == '^' else 1000, (pos[0], pos[1] - 1, '^')),
-                (1 if pos[2] == 'v' else 1000, (pos[0], pos[1] + 1, 'v')),
+                (self.get_score(pos[2], DIR['<']), (pos[0] - 1, pos[1], '<')),
+                (self.get_score(pos[2], DIR['>']), (pos[0] + 1, pos[1], '>')),
+                (self.get_score(pos[2], DIR['^']), (pos[0], pos[1] - 1, '^')),
+                (self.get_score(pos[2], DIR['v']), (pos[0], pos[1] + 1, 'v')),
             ]
 
             neighbours = list(filter(lambda n: self.get_val_at(n[1][0], n[1][1]) != '#', neighbours))
 
-            for neighbour in neighbours:
-                new_score = current_score + neighbour[0]
-                if (neighbour[1][0], neighbour[1][1]) not in scores or new_score < scores[(neighbour[1][0], neighbour[1][1])]:
-                    scores[(neighbour[1][0], neighbour[1][1])] = new_score
-
-                    heapq.heappush(open_paths, (new_score, neighbour[1]))
+            for n in neighbours:
+                new_score = current_score + n[0]
+                if (n[1][0], n[1][1]) not in scores or new_score < scores[(n[1][0], n[1][1])]:
+                    self.came_from[(n[1][0], n[1][1])] = pos
+                    heapq.heappush(open_paths, (new_score, n[1]))
 
         raise ValueError('No path found')
 
@@ -71,7 +96,12 @@ if __name__ == '__main__':
 
     start = round(time() * 1000)
 
-    answer_1 = Maze(lines).find_shortest_path_score()
+    m = Maze(lines)
+    answer_1, path = m.find_shortest_path_score()
+
+    for pos in path:
+        m.set_val_at(pos[0], pos[1], pos[2])
+    m.print_grid()
 
     end_1 = round(time() * 1000)
 
