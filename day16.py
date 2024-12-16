@@ -45,10 +45,10 @@ class Maze(Grid):
                 return current_score
 
             neighbours = [
-                (1 if self.start[2] == '<' else 1000, (self.start[0] - 1, self.start[1], '<')),
-                (1 if self.start[2] == '>' else 1000, (self.start[0] + 1, self.start[1], '>')),
-                (1 if self.start[2] == '^' else 1000, (self.start[0], self.start[1] - 1, '^')),
-                (1 if self.start[2] == 'v' else 1000, (self.start[0], self.start[1] + 1, 'v')),
+                (1 if pos[2] == '<' else 1000, (pos[0] - 1, pos[1], '<')),
+                (1 if pos[2] == '>' else 1000, (pos[0] + 1, pos[1], '>')),
+                (1 if pos[2] == '^' else 1000, (pos[0], pos[1] - 1, '^')),
+                (1 if pos[2] == 'v' else 1000, (pos[0], pos[1] + 1, 'v')),
             ]
 
             neighbours = list(filter(lambda n: self.get_val_at(n[1][0], n[1][1]) != '#', neighbours))
