@@ -67,3 +67,66 @@ class Grid:
         for y in range(self.height):
             print(''.join(self.rows[y]))
         print()
+
+
+class Vector2D:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __add__(self, other):
+        return Vector2D(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other):
+        return Vector2D(self.x + other.x, self.y + other.y)
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+    def __gt__(self, other):
+        if self.x > other.x:
+            return True
+        if self.x == other.x and self.y > other.y:
+            return True
+
+        return False
+
+    def __str__(self):
+        return f'({self.x}, {self.y})'
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+
+class DirectionVector(Vector2D):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+
+    @staticmethod
+    def from_char(direction_char):
+        match direction_char:
+            case '^':
+                return DirectionVector(0, -1)
+            case 'v':
+                return DirectionVector(0, 1)
+            case '<':
+                return DirectionVector(-1, 0)
+            case '>':
+                return DirectionVector(1, 0)
+
+    def rotate_clockwise(self):
+        return DirectionVector(-self.y, self.x)
+
+    def rotate_counter_clockwise(self):
+        return DirectionVector(self.y, -self.x)
+
+    def to_char(self):
+        match (self.x, self.y):
+            case (1, 0):
+                return '>'
+            case (-1, 0):
+                return '<'
+            case (0, 1):
+                return 'v'
+            case (0, -1):
+                return '^'

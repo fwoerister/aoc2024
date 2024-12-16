@@ -3,89 +3,67 @@ import heapq
 from time import time
 
 from util.args import parse_args
-from util.datastructures import Grid
+from util.datastructures import Grid, Vector2D, DirectionVector
 from util.submit import submit_answer
-
-DIR = {
-    '<': (-1, 0),
-    '>': (1, 0),
-    '^': (0, -1),
-    'v': (0, 1),
-}
-
-OPPOSITE_DIR = {
-    '>': (-1, 0),
-    '<': (1, 0),
-    'v': (0, -1),
-    '^': (0, 1),
-}
 
 
 class Maze(Grid):
     def __init__(self, rows):
         super().__init__(rows)
-        self.start = (0, 0, '>')
-        self.end = (0, 0)
-        self.came_from = {
+        self.start = Vector2D(0, 0)
+        self.end = Vector2D(0, 0)
+        self.start_dir = DirectionVector.from_char('>')
 
-        }
+        self.visited_from = {}
+
+        for x in range(self.width):
+            for y in range(self.height):
+                self.visited_from[Vector2D(x, y)] = []
 
         def parse_tile(x, y):
             if self.get_val_at(x, y) == 'S':
-                self.start = (x, y, '>')
+                self.start = Vector2D(x, y)
             if self.get_val_at(x, y) == 'E':
-                self.end = (x, y)
+                self.end = Vector2D(x, y)
 
         self.foreach(parse_tile)
 
-    @staticmethod
-    def get_score(pos, direction):
-        if DIR[pos] == direction:
-            return 1
-        elif OPPOSITE_DIR[pos] == direction:
-            return 2001
-        else:
-            return 1001
+    def find_shortest_path(self):
+        open_nodes = []
+        heapq.heappush(open_nodes, (0, self.start, self.start_dir, [self.start]))
 
-    def reconstruct_path(self, current):
-        total_path = []
-        while (current[0], current[1]) in self.came_from:
-            current_with_dir = self.came_from[(current[0], current[1])]
-            total_path = [current_with_dir] + total_path
-            current = (current_with_dir[0], current_with_dir[1])
-        return total_path
+        min_score = None
+        min_paths = []
 
-    def find_shortest_path_score(self):
-        open_paths = []
-        heapq.heappush(open_paths, (0, self.start))
-
-        scores = {
-            (self.start[0], self.start[1]): 0
+        score = {
+            (self.start, self.start_dir): 0
         }
 
-        while open_paths:
-            current_score, pos = heapq.heappop(open_paths)
-            scores[(pos[0], pos[1])] = current_score
+        while open_nodes:
+            cost, current_pos, current_dir, current_path = heapq.heappop(open_nodes)
 
-            if pos[0] == self.end[0] and pos[1] == self.end[1]:
-                return current_score, self.reconstruct_path((pos[0], pos[1]))
+            if min_score and min_score < cost:
+                return min_score, min_paths
+            elif self.get_val_at(current_pos.x, current_pos.y) == 'E':
+                min_score = cost
+                min_paths.append(current_path)
+                continue
 
             neighbours = [
-                (self.get_score(pos[2], DIR['<']), (pos[0] - 1, pos[1], '<')),
-                (self.get_score(pos[2], DIR['>']), (pos[0] + 1, pos[1], '>')),
-                (self.get_score(pos[2], DIR['^']), (pos[0], pos[1] - 1, '^')),
-                (self.get_score(pos[2], DIR['v']), (pos[0], pos[1] + 1, 'v')),
+                (cost + 1000, current_pos, current_dir.rotate_clockwise(), current_path),
+                (cost + 1000, current_pos, current_dir.rotate_counter_clockwise(), current_path),
             ]
 
-            neighbours = list(filter(lambda n: self.get_val_at(n[1][0], n[1][1]) != '#', neighbours))
+            next_straight_move = current_pos + current_dir
+            if self.get_val_at(next_straight_move.x, next_straight_move.y) != '#':
+                neighbours.append((cost + 1, next_straight_move, current_dir, current_path + [next_straight_move]))
 
             for n in neighbours:
-                new_score = current_score + n[0]
-                if (n[1][0], n[1][1]) not in scores or new_score < scores[(n[1][0], n[1][1])]:
-                    self.came_from[(n[1][0], n[1][1])] = pos
-                    heapq.heappush(open_paths, (new_score, n[1]))
+                if (n[1], n[2]) not in score or score[n[1], n[2]] >= n[0]:
+                    score[(n[1], n[2])] = n[0]
+                    heapq.heappush(open_nodes, n)
 
-        raise ValueError('No path found')
+        return min_score, min_paths
 
 
 if __name__ == '__main__':
@@ -97,15 +75,18 @@ if __name__ == '__main__':
     start = round(time() * 1000)
 
     m = Maze(lines)
-    answer_1, path = m.find_shortest_path_score()
-
-    for pos in path:
-        m.set_val_at(pos[0], pos[1], pos[2])
-    m.print_grid()
+    answer_1, _ = m.find_shortest_path()
 
     end_1 = round(time() * 1000)
 
-    answer_2 = 0
+    _, paths = m.find_shortest_path()
+
+    visited_nodes = set()
+    for path in paths:
+        for pos in path:
+            visited_nodes.add(pos)
+
+    answer_2 = len(visited_nodes)
 
     end_2 = round(time() * 1000)
 
