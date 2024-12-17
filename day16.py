@@ -1,6 +1,4 @@
-import functools
 import heapq
-
 from time import time
 
 from util.args import parse_args
