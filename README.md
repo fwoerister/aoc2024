@@ -1,5 +1,5 @@
 ![](https://img.shields.io/badge/day%20📅-18-blue)
-![](https://img.shields.io/badge/stars%20⭐-34-yellow)
+![](https://img.shields.io/badge/stars%20⭐-36-yellow)
 
 # Advent of Code 2024
 
