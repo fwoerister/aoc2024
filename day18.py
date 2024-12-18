@@ -54,7 +54,7 @@ if __name__ == '__main__':
         start = round(time() * 1000)
 
         mem = Memory(SIZE, SIZE, byte_pos)
-        answer_1 = mem.find_shortest_path_after(BYTES_FALLEN)
+        answer_1, _ = mem.find_shortest_path_after(BYTES_FALLEN)
 
     end_1 = round(time() * 1000)
 
