@@ -22,23 +22,23 @@ class Memory(Grid):
         byte_pos = set(self.byte_pos[:num_bytes])
 
         open_pos = []
-        heappush(open_pos, (0, self.start))
+        heappush(open_pos, (0, self.start, [self.start]))
         visited = {self.start}
 
         while open_pos:
-            path_length, current = heappop(open_pos)
+            path_length, current, path = heappop(open_pos)
 
             if current == self.end:
-                return path_length
+                return path_length, path
 
             neighbours = filter(lambda nb: nb not in byte_pos, self.get_neighbours(*current))
 
             for n in neighbours:
                 if n not in visited:
                     visited.add(n)
-                    heappush(open_pos, (path_length + 1, n))
+                    heappush(open_pos, (path_length + 1, n, path + [n]))
 
-        return -1
+        return -1, None
 
 
 if __name__ == '__main__':
@@ -60,10 +60,16 @@ if __name__ == '__main__':
 
     mem = Memory(SIZE, SIZE, byte_pos)
 
-    for fallen_bytes in range(len(byte_pos) + 1):
-        if mem.find_shortest_path_after(fallen_bytes) == -1:
-            answer_2 = byte_pos[fallen_bytes - 1]
+    idx = 0
+    while idx < len(byte_pos) + 1:
+        path_length, path = mem.find_shortest_path_after(idx)
+
+        if not path:
+            answer_2 = byte_pos[idx - 1]
             break
+
+        while byte_pos[idx - 1] not in path:
+            idx += 1
 
     end_2 = round(time() * 1000)
 
