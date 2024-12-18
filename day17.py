@@ -158,7 +158,8 @@ if __name__ == '__main__':
 
     idx = len(prog) - 1
 
-    octal_digits = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+    octal_digits = [0] * len(prog)
+    octal_digits[-1] = 1
 
     while idx >= 0:
         a_reg = 0

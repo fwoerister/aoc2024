@@ -1,5 +1,6 @@
 from functools import reduce
 from time import time
+
 from util.args import parse_args
 from util.submit import submit_answer
 

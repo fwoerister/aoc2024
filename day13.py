@@ -1,5 +1,6 @@
 import re
 from time import time
+
 import sympy
 
 from util.args import parse_args

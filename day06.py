@@ -1,7 +1,8 @@
+from time import time
+
 from util.args import parse_args
 from util.datastructures import Grid
 from util.submit import submit_answer
-from time import time
 
 DIRECTIONS = {
     '^': (0, -1),

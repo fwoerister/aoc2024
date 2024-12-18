@@ -1,6 +1,7 @@
 import os
-from requests import post, get
 from datetime import datetime
+
+from requests import post, get
 
 SESSION_ID = os.environ['SESSION']
 YEAR = datetime.today().year
