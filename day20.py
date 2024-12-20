@@ -74,12 +74,12 @@ class CPURace(Grid):
             time_dict[pos] = idx
 
         for idx, pos in enumerate(shortest_path):
-            remaining_path = shortest_path[idx+101:]
+            remaining_path = shortest_path[idx+1:]
 
             for target in remaining_path:
                 distance = abs(pos[0] - target[0]) + abs(pos[1] - target[1])
 
-                if distance <= cheat_length and (time_dict[target]-time_dict[pos] - 1) >= 100:
+                if distance <= cheat_length and (time_dict[target]-time_dict[pos] - distance) >= 100:
                     short_cuts += 1
 
         return short_cuts
@@ -98,6 +98,8 @@ if __name__ == '__main__':
     answer_1 = race.find_shortcuts2(2)
     end_1 = round(time() * 1000)
 
+    # wrong guess:
+    # 1046444
     answer_2 = race.find_shortcuts2(20)
 
     end_2 = round(time() * 1000)
