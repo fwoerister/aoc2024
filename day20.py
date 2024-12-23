@@ -3,6 +3,7 @@ from time import time
 
 from util.args import parse_args
 from util.datastructures import Grid
+from util.submit import submit_answer
 
 
 class CPURace(Grid):
@@ -82,7 +83,7 @@ if __name__ == '__main__':
     print(f'time: {end_2 - end_1}ms')
 
     if args.submit == 1:
-        print(submit_answer(answer_1, 19, 1))
+        print(submit_answer(answer_1, 20, 1))
 
     if args.submit == 2:
-        print(submit_answer(answer_2, 19, 2))
+        print(submit_answer(answer_2, 20, 2))
