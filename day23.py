@@ -60,7 +60,7 @@ if '__main__' == __name__:
     answer_1 = 0
     start = round(time() * 1000)
 
-    print(cn.count_groups('t'))
+    answer_1 = cn.count_groups('t')
 
     end_1 = round(time() * 1000)
 
