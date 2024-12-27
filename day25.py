@@ -71,18 +71,8 @@ if '__main__' == __name__:
                 answer_1 += 1
     end_1 = round(time() * 1000)
 
-    answer_2 = 0
-
-    end_2 = round(time() * 1000)
-
     print(answer_1)
     print(f'time: {end_1 - start}ms')
 
-    print(answer_2)
-    print(f'time: {end_2 - end_1}ms')
-
     if args.submit == 1:
         print(submit_answer(answer_1, 25, 1))
-
-    if args.submit == 2:
-        print(submit_answer(answer_2, 25, 2))

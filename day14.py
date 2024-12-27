@@ -104,9 +104,6 @@ if __name__ == '__main__':
 
     answer_2 = 0
 
-    for r in robots_l2:
-        move_robot(r, 6400)
-
     while not could_be_x_mas_tree(robots_l2):
         answer_2 += 1
         for r in robots_l2:
