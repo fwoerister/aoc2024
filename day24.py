@@ -4,159 +4,11 @@ from time import time
 from util.args import parse_args
 from util.submit import submit_answer
 
-
-def find_output_for(gate, gates):
-    for g in gates:
-        op1, operation, op2, output = g
-
-        if (op1, operation, op2) == gate:
-            return output
-
-        if (op2, operation, op1) == gate:
-            return output
-
-
-def swap_gates(old, new, gates):
-    gates = rename_gate(old, new + '_', gates)
-    gates = rename_gate(new, old, gates)
-    return rename_gate(new + '_', new, gates)
-
-
-def set_wire_to(wires, prefix, digits):
-    for idx in range(0, len(digits)):
-        idx_str = str(idx).rjust(2, '0')
-        wires[f'{prefix}{idx_str}'] = digits[idx]
-    return wires
-
-
-def test_digit(gates, position):
-    digits_x = [0] * 45
-    digits_y = [0] * 45
-
-    wires = {}
-    set_wire_to(wires, 'x', digits_x)
-    set_wire_to(wires, 'y', digits_y)
-
-    result = process_gates(gates, wires)
-
-    result = list(result)
-    result.reverse()
-
-    if result[position] != '0' and result[position + 1] != '0':
-        return False
-
-    digits_x = [0] * 45
-    digits_y = [0] * 45
-
-    digits_x[position] = 1
-
-    wires = {}
-    set_wire_to(wires, 'x', digits_x)
-    set_wire_to(wires, 'y', digits_y)
-
-    result = process_gates(gates, wires)
-
-    result = list(result)
-    result.reverse()
-
-    if result[position] != '1' and result[position + 1] != '0':
-        return False
-
-    digits_x = [0] * 45
-    digits_y = [0] * 45
-
-    digits_y[position] = 1
-
-    wires = {}
-    set_wire_to(wires, 'x', digits_x)
-    set_wire_to(wires, 'y', digits_y)
-
-    result = process_gates(gates, wires)
-
-    result = list(result)
-    result.reverse()
-
-    if result[position] != '1' and result[position + 1] != '0':
-        return False
-
-    digits_x = [0] * 45
-    digits_y = [0] * 45
-
-    digits_x[position] = 1
-    digits_y[position] = 1
-
-    wires = {}
-    set_wire_to(wires, 'x', digits_x)
-    set_wire_to(wires, 'y', digits_y)
-
-    result = process_gates(gates, wires)
-
-    result = list(result)
-    result.reverse()
-
-    if result[position] != '0' and result[position + 1] != '1':
-        return False
-
-    if position > 0:
-        digits_x = [0] * 45
-        digits_y = [0] * 45
-
-        digits_x[position - 1] = 1
-        digits_y[position - 1] = 1
-        digits_x[position] = 1
-
-        wires = {}
-        set_wire_to(wires, 'x', digits_x)
-        set_wire_to(wires, 'y', digits_y)
-
-        result = process_gates(gates, wires)
-
-        result = list(result)
-        result.reverse()
-
-        if result[position - 1] != '0' and result[position] != '0' and result[position + 1] != '1':
-            return False
-
-        digits_x = [0] * 45
-        digits_y = [0] * 45
-
-        digits_x[position - 1] = 1
-        digits_y[position - 1] = 1
-        digits_y[position] = 1
-
-        wires = {}
-        set_wire_to(wires, 'x', digits_x)
-        set_wire_to(wires, 'y', digits_y)
-
-        result = process_gates(gates, wires)
-
-        result = list(result)
-        result.reverse()
-
-        if result[position - 1] != '0' and result[position] != '0' and result[position + 1] != '1':
-            return False
-
-        digits_x = [0] * 45
-        digits_y = [0] * 45
-
-        digits_x[position - 1] = 1
-        digits_y[position - 1] = 1
-        digits_x[position] = 1
-        digits_y[position] = 1
-
-        wires = {}
-        set_wire_to(wires, 'x', digits_x)
-        set_wire_to(wires, 'y', digits_y)
-
-        result = process_gates(gates, wires)
-
-        result = list(result)
-        result.reverse()
-
-        if result[position - 1] != '0' and result[position] != '1' and result[position + 1] != '1':
-            return False
-
-    return True
+GATE_FUNCTIONS = {
+    'AND': lambda a, b: a & b,
+    'OR': lambda a, b: a | b,
+    'XOR': lambda a, b: a ^ b,
+}
 
 
 def parse_input(puzzle_input):
@@ -176,11 +28,30 @@ def parse_input(puzzle_input):
         return wires, gates
 
 
-PROCESS_GATE = {
-    'AND': lambda a, b: a & b,
-    'OR': lambda a, b: a | b,
-    'XOR': lambda a, b: a ^ b,
-}
+def init_wires(pos, x, y, carry_in):
+    digits_x = [0] * 45
+    digits_y = [0] * 45
+
+    if x:
+        digits_x[pos] = 1
+    if y:
+        digits_y[pos] = 1
+
+    if pos > 0 and carry_in:
+        digits_x[pos - 1] = 1
+        digits_y[pos - 1] = 1
+
+    wires = {}
+
+    for idx in range(0, len(digits_x)):
+        idx_str = str(idx).rjust(2, '0')
+        wires[f'x{idx_str}'] = digits_x[idx]
+
+    for idx in range(0, len(digits_y)):
+        idx_str = str(idx).rjust(2, '0')
+        wires[f'y{idx_str}'] = digits_y[idx]
+
+    return wires
 
 
 def process_gates(gates, wires):
@@ -188,7 +59,7 @@ def process_gates(gates, wires):
         op1, operator, op2, result_wire = gates[0]
 
         if op1 in wires and op2 in wires:
-            result_value = PROCESS_GATE[operator](wires[op1], wires[op2])
+            result_value = GATE_FUNCTIONS[operator](wires[op1], wires[op2])
             wires[result_wire] = result_value
             gates = gates[1:]
         else:
@@ -208,47 +79,144 @@ def extract_number(prefix, wires):
     return ''.join([str(wire[1]) for wire in digits])
 
 
-def find_gate_by_output(wire, gates):
-    for gate in gates:
-        if gate[3] == wire:
-            return gate
-    return None
-
-
-def extract_gates(starting_wire, gates):
-    found_gates = {starting_wire}
-    size_of_gates = -1
-
-    while size_of_gates < len(found_gates):
-        size_of_gates = len(found_gates)
-
-        new_gates = set()
-
-        for output_wire in found_gates:
-            current_gate = find_gate_by_output(output_wire, gates)
-            if current_gate:
-                if left_parent := find_gate_by_output(current_gate[0], gates):
-                    new_gates.add(left_parent[3])
-                if right_parent := find_gate_by_output(current_gate[2], gates):
-                    new_gates.add(right_parent[3])
-        found_gates = found_gates.union(new_gates)
-    return found_gates
-
-
-def rename_gate(old, new, gates):
+def rename_gate(old, new, gates, only_output=False):
     new_gates = []
     for gate in gates:
         op1, operator, op2, result_wire = gate
 
-        if op1 == old:
-            op1 = new
-        if op2 == old:
-            op2 = new
+        if not only_output:
+            if op1 == old:
+                op1 = new
+            if op2 == old:
+                op2 = new
         if result_wire == old:
             result_wire = new
 
         new_gates.append((op1, operator, op2, result_wire))
     return new_gates
+
+
+def swap_gates(old, new, gates):
+    gates = rename_gate(old, new + '_', gates, only_output=True)
+    gates = rename_gate(new, old, gates, only_output=True)
+    return rename_gate(new + '_', new, gates)
+
+
+def find_gate(gates, operator, op1=None, op2=None):
+    found_gates = []
+    for g in [g for g in gates if g[1] == operator]:
+        g_op1, g_operator, g_op2, g_output = g
+
+        if op1 and op2:
+            if (g_op1 == op1 and g_op2 == op2) or (g_op1 == op2 and g_op2 == op1):
+                found_gates.append(g_output)
+        else:
+            if op1 and op1 in [g_op1, g_op2]:
+                found_gates.append(g_output)
+            if op2 and op2 in [g_op1, g_op2]:
+                found_gates.append(g_output)
+
+    return found_gates
+
+
+def find_potential_operand(gates, operator, op):
+    potential_operands = []
+    for g in gates:
+        g_op1, g_operator, g_op2, g_output = g
+
+        if operator == g_operator:
+            if op == g_op1:
+                potential_operands.append(g_op2)
+            if op == g_op2:
+                potential_operands.append(g_op1)
+    return potential_operands
+
+
+def fix_adder(gates, pos, swaps):
+    if pos == 0:
+        z00 = find_gate(gates, 'XOR', op1='x00', op2='y00')
+        c00 = find_gate(gates, 'AND', op1='x00', op2='y00')
+        gates = rename_gate(z00[0], 'z00', gates)
+        gates = rename_gate(c00[0], 'c00', gates)
+
+        return fix_adder(gates, pos + 1, swaps)
+    elif len(swaps) > 4:
+        return None
+    elif pos == 45:
+        return swaps
+    else:
+        idx_str = str(pos).rjust(2, '0')
+        c_in = f'c{str(pos - 1).rjust(2, '0')}'
+
+        zp = find_gate(gates, 'XOR', f'x{idx_str}', f'y{idx_str}')
+        z = find_gate(gates, 'XOR', zp[0], c_in)
+
+        if not z:
+            for potential_operand in find_potential_operand(gates, 'XOR', zp[0]):
+                new_swaps = swaps + [(potential_operand, c_in)]
+                new_gates = swap_gates(potential_operand, c_in, gates)
+
+                if final_swaps := fix_adder(new_gates, pos, new_swaps):
+                    return final_swaps
+
+            for potential_operand in find_potential_operand(gates, 'XOR', c_in):
+                new_swaps = swaps + [(potential_operand, zp[0])]
+                new_gates = swap_gates(potential_operand, zp[0], gates)
+
+                if final_swaps := fix_adder(new_gates, pos, new_swaps):
+                    return final_swaps
+            return None
+        elif z[0] != f'z{idx_str}':
+            new_swaps = swaps + [(z[0], f'z{idx_str}')]
+            new_gates = swap_gates(z[0], f'z{idx_str}', gates)
+            return fix_adder(new_gates, pos, new_swaps)
+
+        c1 = find_gate(gates, 'AND', f'x{idx_str}', f'y{idx_str}')
+
+        if not c1:
+            return None
+
+        c2 = find_gate(gates, 'AND', zp[0], c_in)
+
+        if not c2:
+
+            for potential_operand in find_potential_operand(gates, 'AND', zp[0]):
+                new_swaps = swaps + [(potential_operand, zp[0])]
+                new_gates = swap_gates(potential_operand, zp[0], gates)
+                if final_swaps := fix_adder(new_gates, pos, new_swaps):
+                    return final_swaps
+
+            for potential_operand in find_potential_operand(gates, 'AND', c_in):
+                new_swaps = swaps + [(potential_operand, c_in)]
+                new_gates = swap_gates(potential_operand, c_in)
+                if final_swaps := fix_adder(new_gates, pos, new_swaps):
+                    return final_swaps
+
+            return None
+
+        c = find_gate(gates, 'OR', c1[0], c2[0])
+
+        if not c:
+            for potential_operand in find_potential_operand(gates, 'OR', c1[0]):
+                new_swaps = swaps + [(potential_operand, c2[0])]
+                new_gates = swap_gates(potential_operand, c2[0], gates)
+                if final_swaps := fix_adder(new_gates, pos, new_swaps):
+                    return final_swaps
+
+            for potential_operand in find_potential_operand(gates, 'OR', c2[0]):
+                new_swaps = swaps + [(potential_operand, c1[0])]
+                new_gates = swap_gates(potential_operand, c1[0], gates)
+                if final_swaps := fix_adder(new_gates, pos, new_swaps):
+                    return final_swaps
+            return None
+
+        gates = rename_gate(zp[0], f'zp{idx_str}', gates)
+        gates = rename_gate(z[0], f'z{idx_str}', gates)
+        gates = rename_gate(c1[0], f'c1_{idx_str}', gates)
+        gates = rename_gate(c2[0], f'c2_{idx_str}', gates)
+        gates = rename_gate(c[0], f'c{idx_str}', gates)
+
+        return fix_adder(gates, pos + 1, swaps)
 
 
 if '__main__' == __name__:
@@ -258,34 +226,21 @@ if '__main__' == __name__:
 
     start = round(time() * 1000)
 
-    answer_1 = process_gates(gates, wires)
+    answer_1 = int(process_gates(gates, wires), 2)
 
     end_1 = round(time() * 1000)
 
     answer_2 = 0
 
-    for idx in range(1, 45):
-        idx_str = str(idx).rjust(2, '0')
-        if not test_digit(gates, idx):
-            if idx == 0:
-                z = find_output_for((f'x{idx_str}', 'XOR', f'y{idx_str}'), gates)
-                c_out = find_output_for((f'x{idx_str}', 'AND', f'y{idx_str}'), gates)
-                gates = rename_gate(c_out, f'z00', gates)
-                gates = rename_gate(c_out, f'c00', gates)
-            else:
-                zp = find_output_for((f'x{idx_str}', 'XOR', f'y{idx_str}'), gates)
-                c_in = f'c{str(idx - 1).rjust(2, '0')}'
-                z = find_output_for((op1= ), gates)
+    involved_gates = set()
+    for swap in fix_adder(gates, 0, []):
+        involved_gates.add(swap[0])
+        involved_gates.add(swap[1])
 
-                c_out1 = find_output_for((zp, 'AND', c_in), gates)
-                c_out2 = find_output_for((f'x{idx_str}', 'AND', f'y{idx_str}'), gates)
+    gate_list = list(involved_gates)
+    gate_list.sort()
 
-                c_out = find_output_for((c_out1, 'OR', c_out2), gates)
-
-                gates = rename_gate('zp', f'zp{idx_str}', gates)
-                gates = rename_gate(c_out, f'c{idx_str}', gates)
-        else:
-            print('error')
+    answer_2 = ','.join(gate_list)
 
     end_2 = round(time() * 1000)
 
